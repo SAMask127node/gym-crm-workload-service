@@ -1,0 +1,42 @@
+server:
+  port: 9090
+
+spring:
+  application:
+    name: workload-service
+  datasource:
+    url: jdbc:h2:mem:workloaddb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    driverClassName: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate.format_sql: true
+
+logging:
+  level:
+    root: INFO
+    com.example.workload: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [tx=%X{txId}] %logger{36} - %msg%n"
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui
+
+security:
+  jwt:
+    issuer: gym-crm
+    secret: dev-secret-please-change
+    audience: internal-services
+    leeway-seconds: 30
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
