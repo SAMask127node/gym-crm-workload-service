@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Operating System specific exclusions
+.DS_Store
+Thumbs.db
