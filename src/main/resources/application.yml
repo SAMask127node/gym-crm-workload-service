@@ -15,6 +15,19 @@ spring:
     open-in-view: false
     properties:
       hibernate.format_sql: true
+  artemis:
+    mode: native
+    broker-url: tcp://localhost:61616
+    user: admin
+    password: admin
+  jms:
+    listener:
+      concurrency: 2-5 # 2 consumers min, up to 5
+      acknowledge-mode: auto
+
+messaging:
+  queues:
+    training-events: training.workload.events
 
 logging:
   level:
