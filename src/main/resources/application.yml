@@ -9,6 +9,9 @@ spring:
     driverClassName: org.h2.Driver
     username: sa
     password: ""
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/workloads
   jpa:
     hibernate:
       ddl-auto: update
