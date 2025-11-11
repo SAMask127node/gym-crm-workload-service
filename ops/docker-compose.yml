@@ -1,0 +1,74 @@
+version: "3.8"
+
+networks:
+  gym-net:
+    driver: bridge
+
+services:
+  activemq:
+    image: vromero/activemq-artemis:2.31.2
+    container_name: activemq
+    environment:
+      - ARTEMIS_USERNAME=admin
+      - ARTEMIS_PASSWORD=admin
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+    networks: [gym-net]
+
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    networks: [gym-net]
+
+  # If you use Eureka; otherwise remove this block
+  discovery-server:
+    image: discovery-server:1.0.0
+    # (Build/publish discovery-server image from its own repo similarly)
+    ports:
+      - "8761:8761"
+    networks: [gym-net]
+
+  main-service:
+    image: main-service:1.0.0    # 👈 uses the tag you built in its repo
+    container_name: main-service
+    depends_on:
+      - activemq
+      - mongo
+      # - discovery-server   # uncomment if used
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # JMS (ActiveMQ)
+      SPRING_ARTEMIS_BROKER_URL: tcp://activemq:61616
+      SPRING_ARTEMIS_USER: admin
+      SPRING_ARTEMIS_PASSWORD: admin
+      # If using Eureka:
+      # EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
+      # If main-service needs Mongo:
+      # SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/workloads
+    ports:
+      - "8080:8080"
+    networks: [gym-net]
+
+  workload-service:
+    image: workload-service:1.0.0  # 👈 uses the tag you built in its repo
+    container_name: workload-service
+    depends_on:
+      - activemq
+      - mongo
+      # - discovery-server
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # JMS for consuming events
+      SPRING_ARTEMIS_BROKER_URL: tcp://activemq:61616
+      SPRING_ARTEMIS_USER: admin
+      SPRING_ARTEMIS_PASSWORD: admin
+      # Mongo for workload aggregation
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/workloads
+      # If using Eureka:
+      # EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
+    ports:
+      - "9090:9090"
+    networks: [gym-net]
